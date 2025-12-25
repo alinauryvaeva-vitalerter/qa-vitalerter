@@ -14,6 +14,6 @@ def driver():
         options=options
     )
 
-    driver.maximize_window()
     yield driver
     driver.quit()
+

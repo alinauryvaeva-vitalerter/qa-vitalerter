@@ -1,29 +1,39 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.11'
-            args '-u root'
-        }
-    }
+    agent any
 
     stages {
-        stage('Checkout') {
+        stage('Start Selenium') {
             steps {
-                checkout scm
+                sh '''
+                docker run -d \
+                  -p 4444:4444 \
+                  --shm-size=2g \
+                  selenium/standalone-chrome:latest
+                '''
             }
         }
 
         stage('Install dependencies') {
             steps {
-                sh 'python --version'
-                sh 'pip install -r requirements.txt'
+                sh '''
+                python --version
+                pip install -r requirements.txt
+                '''
             }
         }
 
-        stage('Run tests') {
+        stage('Run login tests') {
             steps {
-                sh 'PYTHONPATH=. pytest -v'
+                sh '''
+                PYTHONPATH=. pytest tests/test_login_page -v
+                '''
             }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker rm -f $(docker ps -aq --filter ancestor=selenium/standalone-chrome) || true'
         }
     }
 }

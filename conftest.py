@@ -1,6 +1,6 @@
-import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import pytest
 
 @pytest.fixture(scope="function")
 def driver():
@@ -9,11 +9,6 @@ def driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    driver = webdriver.Remote(
-        command_executor="http://localhost:4444/wd/hub",
-        options=options
-    )
-
+    driver = webdriver.Chrome(options=options)
     yield driver
     driver.quit()
-

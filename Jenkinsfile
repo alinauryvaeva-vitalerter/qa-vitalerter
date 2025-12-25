@@ -22,7 +22,7 @@ pipeline {
 
         stage('Run tests') {
             steps {
-                sh 'PYTHONPATH=.pytest -v'
+                sh 'PYTHONPATH=. pytest -v'
             }
         }
     }

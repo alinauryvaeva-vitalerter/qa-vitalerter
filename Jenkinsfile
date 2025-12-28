@@ -10,7 +10,7 @@ pipeline {
             steps {
                 sh '''
                 python3 --version
-                pip3 install -r requirements.txt
+                pip3 install --user -r requirements.txt
                 '''
             }
         }
@@ -18,6 +18,7 @@ pipeline {
         stage('Run login tests') {
             steps {
                 sh '''
+                export PYTHONPATH=$HOME/.local/lib/python3.14/site-packages
                 PYTHONPATH=. pytest tests/test_login_page -v
                 '''
             }

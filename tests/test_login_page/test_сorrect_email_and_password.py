@@ -1,11 +1,19 @@
-from pages.login_page import LoginPage
+import pytest
+from selenium.webdriver.common.by import By
 
 
 def test_login_positive(driver, user_credentials):
-    page = LoginPage(driver)
+    driver.get("https://app.vitalerter.com/login")
 
-    page.open()
-    page.enter_email(user_credentials["email"])
-    page.enter_password(user_credentials["password"])
+    # Используем данные из фикстуры user_credentials
+    email_field = driver.find_element(By.NAME, "email")
+    email_field.send_keys(user_credentials["email"])
 
-    assert page.is_logged_in(), "User was not logged in"
+    password_field = driver.find_element(By.NAME, "password")
+    password_field.send_keys(user_credentials["password"])
+
+    login_button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    login_button.click()
+
+    # Добавь проверку успешного входа (assert)
+    assert "dashboard" in driver.current_url.lower()

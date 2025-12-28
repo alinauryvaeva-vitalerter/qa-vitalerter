@@ -1,27 +1,22 @@
 from pages.login_page import LoginPage
 
 
-def test_login_with_not_activated_email(driver):
+def test_login_with_not_activated_email(driver, base_url, not_activated_user):
     """
     Login with email that received invitation
     but was NOT activated via invite link
 
-    Precondition:
-    - invitation was sent
-    - invite link was NOT opened
-
     Expected result:
-    - error message is shown ("Wrong password")
+    - error message is shown
     """
 
-    page = LoginPage(driver)
+    login_page = LoginPage(driver, base_url)
+    login_page.open()
 
-    page.open()
-    page.enter_email("not_activated_user@test.com")
-    page.enter_password("ANY_PASSWORD_123")
+    login_page.enter_email(not_activated_user["email"])
+    login_page.click_next()
 
-    assert page.is_error_text_visible(), \
-        "Error message is not shown for not activated email"
+    login_page.enter_password(not_activated_user["password"])
+    login_page.click_sign_in()
 
-    assert page.is_password_field_marked_invalid(), \
-        "Password field is not marked invalid"
+    assert login_page.is_not_activated_error_visible()

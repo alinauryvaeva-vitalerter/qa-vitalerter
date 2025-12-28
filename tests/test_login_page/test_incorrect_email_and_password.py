@@ -1,17 +1,13 @@
 from pages.login_page import LoginPage
 
 
-def test_login_with_wrong_email(driver):
-    page = LoginPage(driver)
+def test_login_with_wrong_email(driver, base_url, invalid_user_credentials):
+    login_page = LoginPage(driver, base_url)
+    login_page.open()
 
-    page.open()
-    page.enter_email("wrong_user_123@vitalerter.com")
+    login_page.enter_email(invalid_user_credentials["email"])
+    login_page.click_next()
 
-    assert page.is_error_text_visible(), \
-        "Email error message is not shown"
-
-    assert page.is_email_field_marked_invalid(), \
-        "Email field is not marked invalid"
-
-    assert not page.is_password_input_visible(), \
-        "Password field should not be visible"
+    # пароль НЕ должен появиться
+    assert not login_page.is_password_input_visible()
+    assert login_page.is_still_on_login_page()

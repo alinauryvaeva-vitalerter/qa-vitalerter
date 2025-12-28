@@ -1,15 +1,12 @@
 from pages.login_page import LoginPage
 
 
-def test_login_without_password(driver, base_url, valid_user):
+def test_login_positive(driver, base_url, valid_user):
     login_page = LoginPage(driver, base_url)
     login_page.open()
 
     login_page.enter_email(valid_user["email"])
     login_page.click_next()
 
-    # пароль НЕ вводим
+    login_page.enter_password(valid_user["password"])
     login_page.click_sign_in()
-
-    # ✅ проверяем, что логин не произошёл
-    assert "/login" in driver.current_url

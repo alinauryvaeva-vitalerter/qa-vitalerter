@@ -1,35 +1,38 @@
-import pytest
 import os
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from dotenv import load_dotenv
+import pytest
 
-load_dotenv()
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 @pytest.fixture(scope="function")
 def driver():
+    remote_url = os.getenv("SELENIUM_REMOTE_URL")
+
     options = Options()
-    options.add_argument("--headless")
+    # чтобы в CI не нужен был дисплей
+    if os.getenv("HEADLESS", "true").lower() == "true":
+        options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
-    # Добавляем User-Agent, чтобы сайт не выдавал пустую страницу
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
 
-    # Подключение к контейнеру Selenium, запущенному в Jenkins
-    driver = webdriver.Remote(
-        command_executor='http://127.0.0.1:4444/wd/hub',
-        options=options
-    )
-    yield driver
-    driver.quit()
+    if remote_url:
+        drv = webdriver.Remote(command_executor=remote_url, options=options)
+    else:
+        drv = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    yield drv
+    drv.quit()
 
 
 @pytest.fixture(scope="session")
 def user_credentials():
-    return {
-        "email": os.getenv("EMAIL", "default_test@mail.com"),
-        "password": os.getenv("PASSWORD", "default_password")
-    }
+    email = os.getenv("USER_EMAIL")
+    password = os.getenv("USER_PASSWORD")
+    if not email or not password:
+        pytest.skip("USER_EMAIL/USER_PASSWORD not set")
+    return email, password

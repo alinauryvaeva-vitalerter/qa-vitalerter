@@ -1,12 +1,8 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.11'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -16,6 +12,7 @@ pipeline {
         stage('Start Selenium') {
             steps {
                 sh '''
+                docker rm -f selenium || true
                 docker run -d --name selenium \
                   -p 4444:4444 \
                   --shm-size=2g \
@@ -24,19 +21,18 @@ pipeline {
             }
         }
 
-        stage('Install deps') {
+        stage('Run tests in Python container') {
             steps {
                 sh '''
-                python --version
-                pip install -r requirements.txt
-                '''
-            }
-        }
-
-        stage('Run login tests') {
-            steps {
-                sh '''
-                pytest tests/test_login_page -v
+                docker run --rm \
+                  --network host \
+                  -v "$PWD:/tests" \
+                  -w /tests \
+                  python:3.11 \
+                  bash -c "
+                    pip install -r requirements.txt &&
+                    pytest tests/test_login_page -v
+                  "
                 '''
             }
         }

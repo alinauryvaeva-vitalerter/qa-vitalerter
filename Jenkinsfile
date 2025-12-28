@@ -1,21 +1,16 @@
 pipeline {
     agent any
     environment {
-        // Если переменные не в Credentials, можно задать их тут для теста:
-        EMAIL = 'your_real_email@test.com'
+        // Укажи здесь реальные данные, если не используешь Jenkins Credentials
+        EMAIL = 'your_real_email@example.com'
         PASSWORD = 'your_real_password'
     }
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
         stage('Start Selenium') {
             steps {
                 sh 'docker rm -f selenium || true'
                 sh 'docker run -d --name selenium -p 4444:4444 --shm-size=2g selenium/standalone-chrome:latest'
-                sh 'sleep 5' // Даем Selenium время запуститься
+                sh 'sleep 10' // Ждем полной готовности Chrome
             }
         }
         stage('Run tests') {

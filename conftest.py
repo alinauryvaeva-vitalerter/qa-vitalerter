@@ -13,9 +13,12 @@ def driver():
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")  # Важно для headless!
+    options.add_argument("--window-size=1920,1080")
+    # Добавляем User-Agent, чтобы сайт не выдавал пустую страницу
+    options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
 
-    # Подключение к Selenium Standalone в Jenkins
+    # Подключение к контейнеру Selenium, запущенному в Jenkins
     driver = webdriver.Remote(
         command_executor='http://127.0.0.1:4444/wd/hub',
         options=options
@@ -26,8 +29,7 @@ def driver():
 
 @pytest.fixture(scope="session")
 def user_credentials():
-    # Если переменные в Jenkins не заданы, используем fallback, чтобы не было TypeError
     return {
-        "email": os.getenv("EMAIL", "default_email@test.com"),
+        "email": os.getenv("EMAIL", "default_test@mail.com"),
         "password": os.getenv("PASSWORD", "default_password")
     }

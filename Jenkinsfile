@@ -1,11 +1,13 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.11'
-        }
-    }
+    agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Start Selenium') {
             steps {
                 sh '''
@@ -20,8 +22,8 @@ pipeline {
         stage('Install deps') {
             steps {
                 sh '''
-                python --version
-                pip install -r requirements.txt
+                python3 --version
+                pip3 install -r requirements.txt
                 '''
             }
         }

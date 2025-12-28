@@ -2,12 +2,10 @@ pipeline {
     agent any
 
     environment {
-        SELENIUM_IMAGE = "selenium/standalone-chrome:latest"
-        PYTHON_IMAGE   = "python:3.11"
+        USE_REMOTE_DRIVER = "true"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -33,17 +31,18 @@ pipeline {
                 LOGIN_EMAIL = credentials('LOGIN_EMAIL')
                 LOGIN_PASSWORD = credentials('LOGIN_PASSWORD')
             }
-
             steps {
                 sh '''
                 docker run --rm \
                   --network host \
-                  -v "$WORKSPACE:/tests" \
+                  -e USE_REMOTE_DRIVER=true \
+                  -e BASE_URL=$BASE_URL \
+                  -e LOGIN_EMAIL=$LOGIN_EMAIL \
+                  -e LOGIN_PASSWORD=$LOGIN_PASSWORD \
+                  -v $WORKSPACE:/tests \
                   -w /tests \
-                  -e BASE_URL \
-                  -e LOGIN_EMAIL \
-                  -e LOGIN_PASSWORD \
-                  python:3.11 bash -c "
+                  python:3.11 \
+                  bash -c "
                     pip install -r requirements.txt &&
                     pytest -v
                   "

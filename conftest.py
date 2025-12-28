@@ -3,7 +3,13 @@ import pytest
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from webdriver_manager.chrome import ChromeDriverManager
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 @pytest.fixture
@@ -29,22 +35,28 @@ def invalid_user_credentials():
 
 @pytest.fixture
 def driver():
-    is_ci = os.getenv("CI") == "true"
+    use_remote = os.getenv("USE_REMOTE_DRIVER", "false").lower() == "true"
 
-    options = Options()
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
+    if use_remote:
+        # 🔥 Jenkins / Docker / Selenium
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
 
-    if is_ci:
-        # ✅ Jenkins / Docker / CI
         driver = webdriver.Remote(
             command_executor="http://localhost:4444/wd/hub",
-            desired_capabilities=DesiredCapabilities.CHROME,
             options=options,
         )
     else:
-        # ✅ Local PyCharm
-        driver = webdriver.Chrome(options=options)
+        # 💻 Локальный PyCharm
+        options = Options()
+        options.add_argument("--start-maximized")
+
+        driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()),
+            options=options,
+        )
 
     yield driver
     driver.quit()

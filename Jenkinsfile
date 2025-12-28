@@ -1,16 +1,27 @@
 pipeline {
     agent {
         docker {
-            image 'selenium/standalone-chrome:latest'
+            image 'python:3.11'
         }
     }
 
     stages {
+        stage('Start Selenium') {
+            steps {
+                sh '''
+                docker run -d --name selenium \
+                  -p 4444:4444 \
+                  --shm-size=2g \
+                  selenium/standalone-chrome:latest
+                '''
+            }
+        }
+
         stage('Install deps') {
             steps {
                 sh '''
-                python3 --version
-                pip3 install --user -r requirements.txt
+                python --version
+                pip install -r requirements.txt
                 '''
             }
         }
@@ -18,10 +29,17 @@ pipeline {
         stage('Run login tests') {
             steps {
                 sh '''
-                export PYTHONPATH=$HOME/.local/lib/python3.14/site-packages
-                PYTHONPATH=. pytest tests/test_login_page -v
+                pytest tests/test_login_page -v
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            sh '''
+            docker rm -f selenium || true
+            '''
         }
     }
 }

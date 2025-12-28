@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.11'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     stages {
         stage('Checkout') {
@@ -22,8 +27,8 @@ pipeline {
         stage('Install deps') {
             steps {
                 sh '''
-                python3 --version
-                pip3 install -r requirements.txt
+                python --version
+                pip install -r requirements.txt
                 '''
             }
         }
@@ -39,9 +44,7 @@ pipeline {
 
     post {
         always {
-            sh '''
-            docker rm -f selenium || true
-            '''
+            sh 'docker rm -f selenium || true'
         }
     }
 }

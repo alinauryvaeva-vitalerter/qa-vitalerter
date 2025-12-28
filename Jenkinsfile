@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        BASE_URL = credentials('BASE_URL')
-        LOGIN_EMAIL = credentials('LOGIN_EMAIL')
-        LOGIN_PASSWORD = credentials('LOGIN_PASSWORD')
+        SELENIUM_IMAGE = "selenium/standalone-chrome:latest"
+        PYTHON_IMAGE   = "python:3.11"
     }
 
     stages {
@@ -29,17 +28,22 @@ pipeline {
         }
 
         stage('Run tests') {
+            environment {
+                BASE_URL = credentials('BASE_URL')
+                LOGIN_EMAIL = credentials('LOGIN_EMAIL')
+                LOGIN_PASSWORD = credentials('LOGIN_PASSWORD')
+            }
+
             steps {
                 sh '''
                 docker run --rm \
                   --network host \
-                  -v $WORKSPACE:/tests \
+                  -v "$WORKSPACE:/tests" \
                   -w /tests \
-                  -e BASE_URL=$BASE_URL \
-                  -e LOGIN_EMAIL=$LOGIN_EMAIL \
-                  -e LOGIN_PASSWORD=$LOGIN_PASSWORD \
-                  python:3.11 \
-                  bash -c "
+                  -e BASE_URL \
+                  -e LOGIN_EMAIL \
+                  -e LOGIN_PASSWORD \
+                  python:3.11 bash -c "
                     pip install -r requirements.txt &&
                     pytest -v
                   "

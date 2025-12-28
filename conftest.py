@@ -1,32 +1,15 @@
 import os
 import pytest
-from dotenv import load_dotenv
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-
-# ======================
-# Load .env
-# ======================
-
-load_dotenv()
-
-
-# ======================
-# Base URL
-# ======================
 
 @pytest.fixture
 def base_url():
     return os.getenv("BASE_URL")
 
-
-# ======================
-# Users
-# ======================
 
 @pytest.fixture
 def valid_user():
@@ -45,30 +28,23 @@ def invalid_user_credentials():
 
 
 @pytest.fixture
-def not_activated_user():
-    """
-    Email exists, invitation sent,
-    but invite link was NOT opened
-    """
-    return {
-        "email": "not.activated@example.com",
-        "password": "some-password",
-    }
-
-
-# ======================
-# WebDriver
-# ======================
-
-@pytest.fixture
 def driver():
-    options = Options()
-    options.add_argument("--start-maximized")
+    is_ci = os.getenv("CI") == "true"
 
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
+    options = Options()
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+
+    if is_ci:
+        # ✅ Jenkins / Docker / CI
+        driver = webdriver.Remote(
+            command_executor="http://localhost:4444/wd/hub",
+            desired_capabilities=DesiredCapabilities.CHROME,
+            options=options,
+        )
+    else:
+        # ✅ Local PyCharm
+        driver = webdriver.Chrome(options=options)
 
     yield driver
     driver.quit()

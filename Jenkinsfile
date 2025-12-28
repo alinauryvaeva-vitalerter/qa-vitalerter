@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        BASE_URL = credentials('BASE_URL')
+        LOGIN_EMAIL = credentials('LOGIN_EMAIL')
+        LOGIN_PASSWORD = credentials('LOGIN_PASSWORD')
+    }
+
     stages {
 
         stage('Checkout') {
@@ -29,10 +35,13 @@ pipeline {
                   --network host \
                   -v $WORKSPACE:/tests \
                   -w /tests \
+                  -e BASE_URL=$BASE_URL \
+                  -e LOGIN_EMAIL=$LOGIN_EMAIL \
+                  -e LOGIN_PASSWORD=$LOGIN_PASSWORD \
                   python:3.11 \
                   bash -c "
                     pip install -r requirements.txt &&
-                    pytest tests/test_login_page -v
+                    pytest -v
                   "
                 '''
             }

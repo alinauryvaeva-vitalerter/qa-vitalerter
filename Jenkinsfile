@@ -52,13 +52,13 @@ pipeline {
                   all)
                     TEST_PATH=""
                     ;;
-                  correct_email_and_password)
+                  login_correct_email_and_password)
                     TEST_PATH="tests/test_login_page/test_correct_email_and_password.py"
                     ;;
-                  incorrect_email_and_password)
+                  login_incorrect_email_and_password)
                     TEST_PATH="tests/test_login_page/test_incorrect_email_and_password.py"
                     ;;
-                  passwordless)
+                  login_passwordless)
                     TEST_PATH="tests/test_login_page/test_login_passwordless.py"
                     ;;
                   login_with_not_activated_email)

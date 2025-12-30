@@ -6,17 +6,17 @@ pipeline {
             name: 'TEST_SUITE',
             choices: [
                 'all',
-                'correct_email_and_password',
-                'incorrect_email_and_password',
-                'passwordless',
+                'login_correct_email_and_password',
+                'login_incorrect_email_and_password',
+                'login_passwordless',
                 'login_with_not_activated_email'
             ],
-            description: 'Which tests to run'
+            description: 'Select which tests to run'
         )
     }
 
     environment {
-        USE_REMOTE_DRIVER = 'true'
+        USE_REMOTE_DRIVER = "true"
     }
 
     stages {
@@ -30,12 +30,12 @@ pipeline {
         stage('Start Selenium') {
             steps {
                 sh '''
-                  docker rm -f selenium || true
-                  docker run -d \
-                    --name selenium \
-                    -p 4444:4444 \
-                    --shm-size=2g \
-                    selenium/standalone-chrome:latest
+                docker rm -f selenium || true
+                docker run -d \
+                  --name selenium \
+                  -p 4444:4444 \
+                  --shm-size=2g \
+                  selenium/standalone-chrome:latest
                 '''
             }
         }
@@ -48,38 +48,37 @@ pipeline {
             }
             steps {
                 sh '''
-                  case "$TEST_SUITE" in
-                    correct_email_and_password)
-                      TEST_PATH="tests/test_login_page/test_correct_email_and_password.py"
-                      ;;
-                    incorrect_email_and_password)
-                      TEST_PATH="tests/test_login_page/test_incorrect_email_and_password.py"
-                      ;;
-                    passwordless)
-                      TEST_PATH="tests/test_login_page/test_login_passwordless.py"
-                      ;;
-                    login_with_not_activated_email)
-                      TEST_PATH="tests/test_login_page/test_login_with_not_activated_email.py"
-                      ;;
-                    all)
-                      TEST_PATH="tests"
-                      ;;
-                  esac
+                case "$TEST_SUITE" in
+                  all)
+                    TEST_PATH=""
+                    ;;
+                  correct_email_and_password)
+                    TEST_PATH="tests/test_login_page/test_correct_email_and_password.py"
+                    ;;
+                  incorrect_email_and_password)
+                    TEST_PATH="tests/test_login_page/test_incorrect_email_and_password.py"
+                    ;;
+                  passwordless)
+                    TEST_PATH="tests/test_login_page/test_login_passwordless.py"
+                    ;;
+                  login_with_not_activated_email)
+                    TEST_PATH="tests/test_login_page/test_login_with_not_activated_email.py"
+                    ;;
+                esac
 
-                  echo "Running tests from: $TEST_PATH"
+                echo "Running tests: $TEST_PATH"
 
-                  docker run --rm \
-                    --network host \
-                    -e USE_REMOTE_DRIVER=true \
-                    -e BASE_URL=$BASE_URL \
-                    -e LOGIN_EMAIL=$LOGIN_EMAIL \
-                    -e LOGIN_PASSWORD=$LOGIN_PASSWORD \
-                    -v "$PWD:/tests" \
-                    -w /tests \
-                    python:3.11 bash -c "
-                      pip install -r requirements.txt &&
-                      pytest -v $TEST_PATH
-                    "
+                docker run --rm --network host \
+                  -e USE_REMOTE_DRIVER=true \
+                  -e BASE_URL=$BASE_URL \
+                  -e LOGIN_EMAIL=$LOGIN_EMAIL \
+                  -e LOGIN_PASSWORD=$LOGIN_PASSWORD \
+                  -v $WORKSPACE:/tests \
+                  -w /tests \
+                  python:3.11 bash -c "
+                    pip install -r requirements.txt &&
+                    pytest -v $TEST_PATH
+                  "
                 '''
             }
         }

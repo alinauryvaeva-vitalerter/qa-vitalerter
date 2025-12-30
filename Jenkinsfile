@@ -6,8 +6,8 @@ pipeline {
             name: 'TEST_SUITE',
             choices: [
                 'All tests',
-                'Correct email and password',
-                'Incorrect email and password',
+                'Login correct email and password',
+                'Login incorrect email and password',
                 'Login Passwordless',
                 'Login with not activated email'
             ],
@@ -49,10 +49,10 @@ pipeline {
             steps {
                 sh '''
                   case "$TEST_SUITE" in
-                    "Correct email and password")
+                    "Login correct email and password")
                       TEST_PATH="tests/test_login_page/test_correct_email_and_password.py"
                       ;;
-                    "Incorrect email and password")
+                    "Login incorrect email and password")
                       TEST_PATH="tests/test_login_page/test_incorrect_email_and_password.py"
                       ;;
                     "Login Passwordless")

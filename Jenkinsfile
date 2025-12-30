@@ -5,18 +5,18 @@ pipeline {
         choice(
             name: 'TEST_SUITE',
             choices: [
-                'All tests',
-                'Login correct email and password',
-                'Login incorrect email and password',
-                'Login Passwordless',
-                'Login with not activated email'
+                'all',
+                'correct_email_and_password',
+                'incorrect_email_and_password',
+                'passwordless',
+                'login_with_not_activated_email'
             ],
-            description: 'Choose which tests to run'
+            description: 'Which tests to run'
         )
     }
 
     environment {
-        PYTHONUNBUFFERED = '1'
+        USE_REMOTE_DRIVER = 'true'
     }
 
     stages {
@@ -49,19 +49,19 @@ pipeline {
             steps {
                 sh '''
                   case "$TEST_SUITE" in
-                    "Login correct email and password")
+                    correct_email_and_password)
                       TEST_PATH="tests/test_login_page/test_correct_email_and_password.py"
                       ;;
-                    "Login incorrect email and password")
+                    incorrect_email_and_password)
                       TEST_PATH="tests/test_login_page/test_incorrect_email_and_password.py"
                       ;;
-                    "Login Passwordless")
+                    passwordless)
                       TEST_PATH="tests/test_login_page/test_login_passwordless.py"
                       ;;
-                    "Login with not activated email")
+                    login_with_not_activated_email)
                       TEST_PATH="tests/test_login_page/test_login_with_not_activated_email.py"
                       ;;
-                    *)
+                    all)
                       TEST_PATH="tests"
                       ;;
                   esac
@@ -70,10 +70,11 @@ pipeline {
 
                   docker run --rm \
                     --network host \
+                    -e USE_REMOTE_DRIVER=true \
                     -e BASE_URL=$BASE_URL \
                     -e LOGIN_EMAIL=$LOGIN_EMAIL \
                     -e LOGIN_PASSWORD=$LOGIN_PASSWORD \
-                    -v $WORKSPACE:/tests \
+                    -v "$PWD:/tests" \
                     -w /tests \
                     python:3.11 bash -c "
                       pip install -r requirements.txt &&

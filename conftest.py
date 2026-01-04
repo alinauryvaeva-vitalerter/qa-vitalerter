@@ -32,6 +32,13 @@ def invalid_user_credentials():
         "password": "wrong-password",
     }
 
+@pytest.fixture
+def not_activated_user():
+    return {
+        "email": "not.activated@example.com",
+        "password": "Password123"
+    }
+
 
 @pytest.fixture
 def driver():

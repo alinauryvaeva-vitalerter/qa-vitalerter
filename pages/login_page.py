@@ -10,9 +10,7 @@ class LoginPage:
         self.base_url = base_url
         self.wait = WebDriverWait(driver, 15)
 
-    # ======================
-    # Locators
-    # ======================
+
 
     EMAIL_INPUT = (By.XPATH, "//input[@type='email']")
     NEXT_BUTTON = (By.XPATH, "//button[.//text()[contains(., 'Next')]]")
@@ -30,16 +28,10 @@ class LoginPage:
         "//*[contains(text(), 'activate') or contains(text(), 'not activated')]"
     )
 
-    # ======================
-    # Navigation
-    # ======================
 
     def open(self):
         self.driver.get(self.base_url)
 
-    # ======================
-    # Actions
-    # ======================
 
     def enter_email(self, email: str):
         el = self.wait.until(
@@ -65,9 +57,6 @@ class LoginPage:
             EC.element_to_be_clickable(self.SIGN_IN_BUTTON)
         ).click()
 
-    # ======================
-    # State checks (KEY!)
-    # ======================
 
     def is_password_input_visible(self) -> bool:
         try:
